@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherWeb3 - Multi-EVM Gateway</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff0000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #ff0000;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #cc0000, #990000);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid #ff0000;
+        }
+
+        .btn-secondary:hover {
+            background: #ff0000;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://storage.googleapis.com/aetherweb3-assets/images/corporate-image-1.png') center/cover;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff, #ff0000);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #cccccc;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff0000;
+        }
+
+        .stat-label {
+            color: #cccccc;
+            margin-top: 0.5rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background: #111111;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .section-title p {
+            font-size: 1.2rem;
+            color: #cccccc;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #1a1a1a, #222222);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff0000, #cc0000);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .feature-card p {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            position: relative;
+        }
+
+        .pricing::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://storage.googleapis.com/aetherweb3-assets/images/corporate-image-2.png') center/cover;
+            opacity: 0.05;
+            z-index: 1;
+        }
+
+        .pricing-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: linear-gradient(135deg, #1a1a1a, #222222);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid #333;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card.featured {
+            border: 2px solid #ff0000;
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff0000;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 0, 0, 0.1);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .pricing-header h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .pricing-header p {
+            color: #cccccc;
+            margin-bottom: 2rem;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+
+        .price small {
+            font-size: 1rem;
+            color: #cccccc;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 0.5rem 0;
+            color: #cccccc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pricing-features li i {
+            color: #ff0000;
+            width: 20px;
+        }
+
+        /* Documentation Section */
+        .documentation {
+            padding: 80px 0;
+            background: #111111;
+        }
+
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .docs-section {
+            background: linear-gradient(135deg, #1a1a1a, #222222);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        .docs-section h3 {
+            color: #ff0000;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .docs-section h3 i {
+            font-size: 1.3rem;
+        }
+
+        .docs-content h4 {
+            color: #ffffff;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .docs-content h4:first-child {
+            margin-top: 0;
+        }
+
+        .docs-content p {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .docs-content ul {
+            color: #cccccc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .docs-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .docs-content pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .docs-content code {
+            color: #ff6b6b;
+            font-family: 'Courier New', monospace;
+        }
+
+        .network-info {
+            background: #0a0a0a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 3px solid #ff0000;
+        }
+
+        .network-info h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .network-info p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .network-info code {
+            background: #1a1a1a;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        /* Dashboard Section */
+        .dashboard {
+            padding: 80px 0;
+            background: #111111;
+            display: none;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #1a1a1a, #222222);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        .dashboard-card h4 {
+            color: #cccccc;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff0000;
+        }
+
+        /* Forms */
+        .form-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1a1a1a, #222222);
+            border-radius: 12px;
+            border: 1px solid #333;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container.show {
+            display: block;
+        }
+
+        .form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1999;
+            display: none;
+        }
+
+        .form-overlay.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #2a2a2a;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success-message {
+            color: #44ff44;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-5px);
+            }
+
+            .docs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-section {
+                padding: 1.5rem;
+            }
+
+            .docs-content pre {
+                font-size: 0.8rem;
+                padding: 0.8rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff0000;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer */
+        footer {
+            background: #000000;
+            padding: 2rem 0 1rem;
+            border-top: 1px solid #333;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .footer-content a {
+            color: #ff0000;
+            text-decoration: none;
+        }
+
+        .footer-content a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="/" class="logo">
+                <i class="fas fa-cube"></i>
+                AetherWeb3
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#" id="dashboardBtn">Dashboard</a></li>
+                <li><a href="#documentation">Docs</a></li>
+                <li><a href="mailto:sales@nibertinvestments.com">Sales</a></li>
+                <li><a href="mailto:support@nibertinvestments.com">Support</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <a href="#" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="#" class="btn btn-primary" id="signupBtn">Get Started</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Multi-EVM Gateway</h1>
+                    <p>Connect to Ethereum, Base, and Arbitrum networks with enterprise-grade reliability and lightning-fast response times.</p>
+                    <div class="auth-buttons">
+                        <a href="#" class="btn btn-primary" id="heroSignupBtn">Start Building</a>
+                        <a href="#documentation" class="btn btn-secondary">View Documentation</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-number">99.9%</div>
+                            <div class="stat-label">Uptime</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">EVM Networks</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">1800</div>
+                            <div class="stat-label">Calls/Sec</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Why Choose AetherWeb3?</h2>
+                    <p>Built for developers who demand performance, reliability, and scale</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h3>Multi-EVM Support</h3>
+                        <p>Access Ethereum, Base, and Arbitrum networks through a single, unified API endpoint with seamless switching between networks.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Lightning Fast</h3>
+                        <p>Sub-100ms response times with HTTP/2 and WebSocket support. Optimized infrastructure for maximum throughput.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Enterprise Security</h3>
+                        <p>API key authentication, rate limiting, and DDoS protection. Your applications are secure and protected.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Real-time Analytics</h3>
+                        <p>Monitor your API usage, track performance metrics, and optimize your applications with detailed analytics.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3>Developer Friendly</h3>
+                        <p>RESTful APIs, comprehensive documentation, and SDK support for popular programming languages.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>24/7 Support</h3>
+                        <p>Get help when you need it with our dedicated support team and comprehensive documentation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="pricing" id="pricing">
+            <div class="container">
+                <div class="pricing-content">
+                    <div class="section-title">
+                        <h2>Simple, Transparent Pricing</h2>
+                        <p>Start free, scale as you grow</p>
+                    </div>
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="pricing-header">
+                                <h3>Free</h3>
+                                <p>Perfect for getting started</p>
+                            </div>
+                            <div class="price">
+                                $0<small>/month</small>
+                            </div>
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-check"></i> 120,000 calls per day</li>
+                                <li><i class="fas fa-check"></i> 20 calls per minute</li>
+                                <li><i class="fas fa-check"></i> All EVM networks</li>
+                                <li><i class="fas fa-check"></i> Basic analytics</li>
+                                <li><i class="fas fa-check"></i> Community support</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary signup-btn" data-plan="free">Get Started</a>
+                        </div>
+                        <div class="pricing-card featured">
+                            <div class="pricing-header">
+                                <h3>Starter</h3>
+                                <p>For growing applications</p>
+                            </div>
+                            <div class="price">
+                                $9.99<small>/month</small>
+                            </div>
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-check"></i> 120,000 free calls/day</li>
+                                <li><i class="fas fa-check"></i> $0.0004 per additional overage call</li>
+                                <li><i class="fas fa-check"></i> Max 25M calls/month</li>
+                                <li><i class="fas fa-check"></i> All EVM networks</li>
+                                <li><i class="fas fa-check"></i> Basic analytics</li>
+                                <li><i class="fas fa-check"></i> Email support</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary signup-btn" data-plan="starter">Start Free Trial</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="pricing-header">
+                                <h3>Pro</h3>
+                                <p>For enterprise applications</p>
+                            </div>
+                            <div class="price">
+                                $29.99<small>/month</small>
+                            </div>
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-check"></i> 120,000 free calls/day</li>
+                                <li><i class="fas fa-check"></i> $0.0001 per additional call</li>
+                                <li><i class="fas fa-check"></i> Max 200M calls/month</li>
+                                <li><i class="fas fa-check"></i> All EVM networks</li>
+                                <li><i class="fas fa-check"></i> Advanced analytics</li>
+                                <li><i class="fas fa-check"></i> Priority support</li>
+                                <li><i class="fas fa-check"></i> Custom integrations</li>
+                            </ul>
+                            <a href="#" class="btn btn-primary signup-btn" data-plan="pro">Get Started</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="pricing-header">
+                                <h3>WebSocket Streaming</h3>
+                                <p>Real-time blockchain data</p>
+                            </div>
+                            <div class="price">
+                                Contact<small> Sales</small>
+                            </div>
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-check"></i> Real-time WebSocket streams</li>
+                                <li><i class="fas fa-check"></i> Custom event subscriptions</li>
+                                <li><i class="fas fa-check"></i> Dedicated infrastructure</li>
+                                <li><i class="fas fa-check"></i> Premium support</li>
+                            </ul>
+                            <a href="mailto:sales@nibertinvestments.com" class="btn btn-primary signup-btn">Contact Sales</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation Section -->
+        <section class="documentation" id="documentation">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Developer Documentation</h2>
+                    <p>Everything you need to integrate with AetherWeb3 Gateway</p>
+                </div>
+                
+                <div class="docs-grid">
+                    <div class="docs-section">
+                        <h3><i class="fas fa-rocket"></i> Quick Start</h3>
+                        <div class="docs-content">
+                            <h4>1. Get Your API Key</h4>
+                            <p>Sign up for a free account to receive your API key instantly. No credit card required for the free tier.</p>
+                            
+                            <h4>2. Make Your First Request</h4>
+                            <pre><code>curl -X POST https://multi-evm-gateway-197221342816.us-central1.run.app/ethereum \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "eth_getBalance",
+    "params": ["0x742d35cc6634c0532925a3b8d3ac74e4dc3c8ef5", "latest"],
+    "id": 1
+  }'</code></pre>
+                            
+                            <h4>3. Handle the Response</h4>
+                            <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1b1ae4d6e2ef500000"
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="docs-section">
+                        <h3><i class="fas fa-network-wired"></i> Supported Networks</h3>
+                        <div class="docs-content">
+                            <div class="network-info">
+                                <h4>Ethereum Mainnet</h4>
+                                <p><strong>Endpoint:</strong> <code>/ethereum</code></p>
+                                <p><strong>Chain ID:</strong> 1</p>
+                            </div>
+                            
+                            <div class="network-info">
+                                <h4>Base</h4>
+                                <p><strong>Endpoint:</strong> <code>/base</code></p>
+                                <p><strong>Chain ID:</strong> 8453</p>
+                            </div>
+                            
+                            <div class="network-info">
+                                <h4>Arbitrum One</h4>
+                                <p><strong>Endpoint:</strong> <code>/arbitrum</code></p>
+                                <p><strong>Chain ID:</strong> 42161</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="docs-section">
+                        <h3><i class="fas fa-code"></i> Authentication</h3>
+                        <div class="docs-content">
+                            <h4>API Key Authentication</h4>
+                            <p>Include your API key in the X-API-Key header:</p>
+                            <pre><code>X-API-Key: YOUR_API_KEY</code></pre>
+                            
+                            <h4>Rate Limits</h4>
+                            <ul>
+                                <li><strong>Free:</strong> 20 requests/minute, 120,000/day</li>
+                                <li><strong>Starter:</strong> 60 requests/minute, 25M/month</li>
+                                <li><strong>Pro:</strong> 200 requests/minute, 200M/month</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="docs-section">
+                        <h3><i class="fas fa-bolt"></i> WebSocket Connections</h3>
+                        <div class="docs-content">
+                            <h4>Real-time Data Streaming</h4>
+                            <p>Connect to our WebSocket endpoints for real-time blockchain data:</p>
+                            <pre><code>const ws = new WebSocket('wss://api.aetherweb3.xyz/ws/v1/ethereum?auth=YOUR_API_KEY');
+
+ws.onopen = function() {
+  // Subscribe to new blocks
+  ws.send(JSON.stringify({
+    "jsonrpc": "2.0",
+    "method": "eth_subscribe",
+    "params": ["newHeads"],
+    "id": 1
+  }));
+};
+
+ws.onmessage = function(event) {
+  const data = JSON.parse(event.data);
+  console.log('New block:', data);
+};</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="docs-section">
+                        <h3><i class="fas fa-chart-line"></i> Performance & Reliability</h3>
+                        <div class="docs-content">
+                            <h4>Enterprise Infrastructure</h4>
+                            <ul>
+                                <li><strong>99.9% Uptime SLA</strong> - Redundant infrastructure across multiple regions</li>
+                                <li><strong>Sub-100ms Response Times</strong> - Optimized for high-frequency trading and DeFi</li>
+                                <li><strong>Global CDN</strong> - Edge locations worldwide for minimal latency</li>
+                                <li><strong>Auto-scaling</strong> - Handles traffic spikes seamlessly</li>
+                            </ul>
+                            
+                            <h4>Security Features</h4>
+                            <ul>
+                                <li>DDoS protection and traffic filtering</li>
+                                <li>API key rotation and management</li>
+                                <li>Request signing and validation</li>
+                                <li>SOC 2 Type II compliant infrastructure</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="docs-section">
+                        <h3><i class="fas fa-question-circle"></i> Support & Resources</h3>
+                        <div class="docs-content">
+                            <h4>Getting Help</h4>
+                            <ul>
+                                <li><strong>Technical Support:</strong> <a href="mailto:support@nibertinvestments.com">support@nibertinvestments.com</a></li>
+                                <li><strong>Sales Inquiries:</strong> <a href="mailto:sales@nibertinvestments.com">sales@nibertinvestments.com</a></li>
+                                <li><strong>Status Page:</strong> Real-time service status and incidents</li>
+                                <li><strong>Discord Community:</strong> Join our developer community</li>
+                            </ul>
+                            
+                            <h4>Enterprise Solutions</h4>
+                            <p>Need custom solutions, dedicated infrastructure, or higher rate limits?</p>
+                            <a href="mailto:sales@nibertinvestments.com" class="btn btn-primary">Contact Sales</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Dashboard Section (Hidden by default) -->
+    <section class="dashboard" id="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <div class="auth-buttons">
+                    <a href="#" class="btn btn-secondary" id="logoutBtn">Logout</a>
+                </div>
+            </div>
+            <div class="dashboard-stats">
+                <div class="dashboard-card">
+                    <h4>Total API Calls Today</h4>
+                    <div class="value" id="todayCalls">0</div>
+                </div>
+                <div class="dashboard-card">
+                    <h4>Remaining Calls</h4>
+                    <div class="value" id="remainingCalls">120,000</div>
+                </div>
+                <div class="dashboard-card">
+                    <h4>Current Plan</h4>
+                    <div class="value" id="currentPlan">Free</div>
+                </div>
+                <div class="dashboard-card">
+                    <h4>API Key</h4>
+                    <div class="value" style="font-size: 1rem; word-break: break-all;" id="apiKey">Loading...</div>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h4>Quick Start</h4>
+                <pre style="background: #2a2a2a; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>curl -X POST https://multi-evm-gateway-197221342816.us-central1.run.app/ethereum \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "eth_getBalance",
+    "params": ["0x...", "latest"],
+    "id": 1
+  }'</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form Overlay -->
+    <div class="form-overlay" id="formOverlay"></div>
+
+    <!-- Login Form -->
+    <div class="form-container" id="loginForm">
+        <button style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;" onclick="closeForms()">&times;</button>
+        <h2 style="text-align: center; margin-bottom: 2rem; color: #ffffff;">Login</h2>
+        <form id="loginFormElement">
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" required>
+                <div class="error-message" id="loginEmailError"></div>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+                <div class="error-message" id="loginPasswordError"></div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginSubmitBtn">
+                    Login
+                </button>
+            </div>
+            <div class="error-message" id="loginFormError"></div>
+            <div class="success-message" id="loginFormSuccess"></div>
+        </form>
+        <p style="text-align: center; margin-top: 1rem; color: #cccccc;">
+            Don't have an account? <a href="#" id="showSignupForm" style="color: #ff0000;">Sign up</a>
+        </p>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="form-container" id="signupForm">
+        <button style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;" onclick="closeForms()">&times;</button>
+        <h2 style="text-align: center; margin-bottom: 2rem; color: #ffffff;">Create Account</h2>
+        <form id="signupFormElement">
+            <div class="form-group">
+                <label for="signupUsername">Username</label>
+                <input type="text" id="signupUsername" required>
+                <div class="error-message" id="signupUsernameError"></div>
+            </div>
+            <div class="form-group">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" required>
+                <div class="error-message" id="signupEmailError"></div>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" required>
+                <div class="error-message" id="signupPasswordError"></div>
+            </div>
+            <div class="form-group">
+                <label for="signupConfirmPassword">Confirm Password</label>
+                <input type="password" id="signupConfirmPassword" required>
+                <div class="error-message" id="signupConfirmPasswordError"></div>
+            </div>
+            <div class="form-group">
+                <label for="signupPlan">Select Plan</label>
+                <select id="signupPlan" style="width: 100%; padding: 0.75rem; border: 1px solid #444; border-radius: 8px; background: #2a2a2a; color: #ffffff;">
+                    <option value="free">Free - $0/month</option>
+                    <option value="starter">Starter - $9.99/month</option>
+                    <option value="pro">Pro - $29.99/month</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="signupSubmitBtn">
+                    Create Account
+                </button>
+            </div>
+            <div class="error-message" id="signupFormError"></div>
+            <div class="success-message" id="signupFormSuccess"></div>
+        </form>
+        <p style="text-align: center; margin-top: 1rem; color: #cccccc;">
+            Already have an account? <a href="#" id="showLoginForm" style="color: #ff0000;">Login</a>
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>aetherweb3.xyz brought to you by <a href="mailto:sales@nibertinvestments.com">Nibert Investments LLC</a></p>
+                <p>&copy; 2025 Nibert Investments LLC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Stripe JS -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <script>
+        // API Configuration - use production Cloud Run endpoint
+        const API_BASE_URL = 'https://multi-evm-gateway-197221342816.us-central1.run.app';
+        
+        // Initialize Stripe
+        const stripe = Stripe('pk_live_51Rz6RyL16dRIvW3aw8RmWn30hy9G8cLQCyjmsJgKh8lkOoZBSzCaPnc8AvdiAT7uXVLVVXz6pXZ1XU9QVIdG8GtP00hX4rENeW');
+
+        // Form elements
+        const formOverlay = document.getElementById('formOverlay');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const mainContent = document.getElementById('mainContent');
+        const dashboard = document.getElementById('dashboard');
+
+        // User state
+        let currentUser = null;
+
+        // Form management functions
+        function showLogin() {
+            formOverlay.classList.add('show');
+            loginForm.classList.add('show');
+            signupForm.classList.remove('show');
+        }
+
+        function showSignup() {
+            formOverlay.classList.add('show');
+            signupForm.classList.add('show');
+            loginForm.classList.remove('show');
+        }
+
+        function closeForms() {
+            formOverlay.classList.remove('show');
+            loginForm.classList.remove('show');
+            signupForm.classList.remove('show');
+        }
+
+        function showDashboard() {
+            closeForms();
+            mainContent.style.display = 'none';
+            dashboard.style.display = 'block';
+            updateDashboard();
+        }
+
+        function showMain() {
+            closeForms();
+            dashboard.style.display = 'none';
+            mainContent.style.display = 'block';
+        }
+
+        function updateDashboard() {
+            if (currentUser) {
+                document.getElementById('currentPlan').textContent = currentUser.plan || 'Free';
+                document.getElementById('apiKey').textContent = currentUser.apiKey || 'Loading...';
+                document.getElementById('todayCalls').textContent = currentUser.todayCalls || '0';
+                document.getElementById('remainingCalls').textContent = currentUser.remainingCalls || '120,000';
+            }
+        }
+
+        // Authentication functions - CORRECTED TO MATCH WORKING BACKEND
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const submitBtn = document.getElementById('loginSubmitBtn');
+
+            clearFormErrors('login');
+
+            if (!email || !password) {
+                showFormError('loginFormError', 'Please fill in all fields');
+                return;
+            }
+
+            submitBtn.innerHTML = '<span class="loading"></span> Logging in...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || data.message || 'Login failed');
+                }
+
+                // Store authentication data matching actual backend response
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('userData', JSON.stringify({
+                    id: data.user_id,
+                    email: email,
+                    plan: data.plan,
+                    apiKey: data.api_key,
+                    todayCalls: '0',
+                    remainingCalls: '120,000'
+                }));
+                
+                currentUser = {
+                    id: data.user_id,
+                    email: email,
+                    plan: data.plan,
+                    apiKey: data.api_key,
+                    todayCalls: '0',
+                    remainingCalls: '120,000'
+                };
+
+                showFormSuccess('loginFormSuccess', 'Login successful!');
+                setTimeout(() => showDashboard(), 1000);
+
+            } catch (error) {
+                showFormError('loginFormError', error.message);
+            } finally {
+                submitBtn.innerHTML = 'Login';
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function handleSignup() {
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const plan = document.getElementById('signupPlan').value;
+            const submitBtn = document.getElementById('signupSubmitBtn');
+
+            clearFormErrors('signup');
+
+            if (!username || !email || !password || !confirmPassword) {
+                showFormError('signupFormError', 'Please fill in all fields');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showFormError('signupConfirmPasswordError', 'Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                showFormError('signupPasswordError', 'Password must be at least 6 characters');
+                return;
+            }
+
+            if (username.length < 3) {
+                showFormError('signupUsernameError', 'Username must be at least 3 characters');
+                return;
+            }
+
+            submitBtn.innerHTML = '<span class="loading"></span> Creating account...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username,
+                        email, 
+                        password, 
+                        plan: plan
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || data.message || 'Registration failed');
+                }
+
+                // Store authentication data matching actual backend response
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('userData', JSON.stringify({
+                    id: data.user_id,
+                    username: username,
+                    email: email,
+                    plan: data.plan,
+                    apiKey: data.api_key,
+                    todayCalls: '0',
+                    remainingCalls: '120,000'
+                }));
+                
+                currentUser = {
+                    id: data.user_id,
+                    username: username,
+                    email: email,
+                    plan: data.plan,
+                    apiKey: data.api_key,
+                    todayCalls: '0',
+                    remainingCalls: '120,000'
+                };
+
+                showFormSuccess('signupFormSuccess', 'Account created successfully!');
+                setTimeout(() => showDashboard(), 1000);
+
+            } catch (error) {
+                showFormError('signupFormError', error.message);
+            } finally {
+                submitBtn.innerHTML = 'Create Account';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            currentUser = null;
+            showMain();
+        }
+
+        // Utility functions
+        function showFormError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function showFormSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function clearFormErrors(formType) {
+            if (formType === 'login') {
+                ['loginEmailError', 'loginPasswordError', 'loginFormError', 'loginFormSuccess']
+                    .forEach(id => document.getElementById(id).style.display = 'none');
+            } else if (formType === 'signup') {
+                ['signupUsernameError', 'signupEmailError', 'signupPasswordError', 'signupConfirmPasswordError', 'signupFormError', 'signupFormSuccess']
+                    .forEach(id => document.getElementById(id).style.display = 'none');
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check auth state
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            if (token && userData) {
+                currentUser = JSON.parse(userData);
+                showDashboard();
+            }
+
+            // Form event listeners
+            document.getElementById('loginBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showLogin();
+            });
+
+            document.getElementById('signupBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSignup();
+            });
+
+            document.getElementById('heroSignupBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSignup();
+            });
+
+            document.getElementById('showSignupForm')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSignup();
+            });
+
+            document.getElementById('showLoginForm')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showLogin();
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+            });
+
+            document.getElementById('dashboardBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    showDashboard();
+                } else {
+                    showLogin();
+                }
+            });
+
+            // Form submissions
+            document.getElementById('loginFormElement')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleLogin();
+            });
+
+            document.getElementById('signupFormElement')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleSignup();
+            });
+
+            // Close forms when clicking overlay
+            formOverlay.addEventListener('click', closeForms);
+
+            // Plan selection buttons
+            document.querySelectorAll('.signup-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const plan = btn.getAttribute('data-plan');
+                    if (plan) {
+                        document.getElementById('signupPlan').value = plan;
+                    }
+                    showSignup();
+                });
+            });
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(0, 0, 0, 0.98)';
+            } else {
+                header.style.background = 'rgba(0, 0, 0, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>
